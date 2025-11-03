@@ -7,7 +7,6 @@ A comprehensive full-stack task management application built with Node.js, Expre
 ### Backend Features
 - ✅ **User Authentication** - JWT-based authentication with bcrypt password hashing
 - ✅ **Task Management** - Complete CRUD operations for tasks
-- ✅ **Role-Based Access Control** - Admin and User roles with different permissions
 - ✅ **File Uploads** - Support for task attachments
 - ✅ **Input Validation** - Express-validator for request validation
 - ✅ **Security** - Helmet, CORS, rate limiting
@@ -255,7 +254,6 @@ Content-Type: application/json
     "id": 1,
     "name": "John Doe",
     "email": "john@example.com",
-    "role": "user"
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
@@ -280,7 +278,6 @@ Content-Type: application/json
     "id": 1,
     "name": "John Doe",
     "email": "john@example.com",
-    "role": "user"
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
@@ -386,7 +383,6 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
-  role ENUM('user', 'admin') DEFAULT 'user',
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
