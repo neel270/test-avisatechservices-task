@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, getTask, createTask, updateTask, deleteTask, markTaskComplete, updateStatus } from '../controllers/taskController';
+import { getTasks, getTask, createTask, updateTask, deleteTask, updateStatus } from '../controllers/taskController';
 import { taskValidation } from '../middleware/validation';
 import { auth } from '../middleware/auth';
 
@@ -11,7 +11,6 @@ router.get('/', getTasks);
 router.get('/:id', getTask);
 router.post('/', taskValidation, createTask);
 router.put('/:id', taskValidation, updateTask);
-router.patch('/:id/complete', markTaskComplete);
 router.patch('/:id/status', updateStatus);
 router.delete('/:id', deleteTask);
 

@@ -134,30 +134,6 @@ const deleteTask = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-const markTaskComplete = async (req: AuthRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user!.id;
-
-    const task = await Tasks.findOne({ where: { id, user_id: userId } });
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-
-    await Tasks.update({ status: 3 }, { where: { id, user_id: userId } });
-
-    const updatedTask = await Tasks.findByPk(id);
-    res.json({
-      message: 'Task marked as complete',
-      task: updatedTask,
-    });
-  } catch (error) {
-    console.error('Mark task complete error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
 const updateStatus = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -182,4 +158,4 @@ const updateStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export { getTasks, getTask, createTask, updateTask, deleteTask, markTaskComplete, updateStatus };
+export { getTasks, getTask, createTask, updateTask, deleteTask, updateStatus };

@@ -48,14 +48,19 @@ class ApiService {
 
   // Task API methods
   async getTasks(params?: { page?: number; limit?: number; status?: string; sortBy?: string }): Promise<TasksResponse> {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
-    const response = await axios.get(`${API_BASE_URL}/tasks?${queryParams.toString()}`);
-    return response.data;
+      const response = await axios.get(`${API_BASE_URL}/tasks?${queryParams.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw error;
+    }
   }
 
   async getTask(id: number): Promise<Task> {
@@ -75,11 +80,6 @@ class ApiService {
 
   async deleteTask(id: number): Promise<void> {
     await axios.delete(`${API_BASE_URL}/tasks/${id}`);
-  }
-
-  async markTaskComplete(id: number): Promise<Task> {
-    const response = await axios.patch(`${API_BASE_URL}/tasks/${id}/complete`);
-    return response.data.task;
   }
 
   async updateStatus(id: number, status: number): Promise<Task> {

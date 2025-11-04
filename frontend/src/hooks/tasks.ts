@@ -11,6 +11,7 @@ export function useTasks(params?: { page?: number; limit?: number; status?: stri
   return useQuery<TasksResponse>({
     queryKey: [...keys.all, params],
     queryFn: () => apiService.getTasks(params),
+
   });
 }
 
@@ -64,22 +65,6 @@ export function useDeleteTask() {
     },
     onError: () => {
       showToast('error', 'Failed to delete task');
-    },
-  });
-}
-
-export function useMarkTaskComplete() {
-  const qc = useQueryClient();
-  const { showToast } = useToast();
-  return useMutation<Task, unknown, number>({
-    mutationFn: (id: number) => apiService.markTaskComplete(id),
-    onSuccess: (_result: Task, id: number) => {
-      qc.invalidateQueries({ queryKey: keys.detail(id) });
-      qc.invalidateQueries({ queryKey: keys.all });
-      showToast('success', 'Task marked as complete');
-    },
-    onError: () => {
-      showToast('error', 'Failed to mark task as complete');
     },
   });
 }

@@ -1,49 +1,68 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTasks, useDeleteTask, useMarkTaskComplete, useUpdateStatus } from '../hooks/tasks';
-import { AppLayout } from './layout/AppLayout';
-import { Button } from './ui/Button';
-import { Select } from './ui/Select';
-import { Badge } from './ui/Badge';
-import { Spinner } from './ui/Spinner';
-import { EmptyState } from './ui/EmptyState';
-import Pagination from './ui/Pagination';
-import type { Task } from '../services/api';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  useTasks,
+  useDeleteTask,
+  useUpdateStatus,
+} from "../hooks/tasks";
+import { AppLayout } from "./layout/AppLayout";
+import { Button } from "./ui/Button";
+import { Select } from "./ui/Select";
+import { Badge } from "./ui/Badge";
+import { Spinner } from "./ui/Spinner";
+import { EmptyState } from "./ui/EmptyState";
+import Pagination from "./ui/Pagination";
+import type { Task } from "../services/api";
 
 const Dashboard: React.FC = () => {
-  const [filter, setFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('due_date');
+  const [filter, setFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("due_date");
   const [page, setPage] = useState<number>(1);
   const navigate = useNavigate();
   const deleteTaskMutation = useDeleteTask();
-  const markCompleteMutation = useMarkTaskComplete();
   const updateStatusMutation = useUpdateStatus();
 
-  const { data: tasksResponse, isLoading: loading } = useTasks({
+  const {
+    data: tasksResponse,
+    isLoading: loading,
+    isError,
+    error,
+  } = useTasks({
     page,
     limit: 10,
-    status: filter === 'all' ? undefined : filter === 'pending' ? '1' : filter === 'in_progress' ? '2' : '3',
+    status:
+      filter === "all"
+        ? undefined
+        : filter === "pending"
+        ? "1"
+        : filter === "in_progress"
+        ? "2"
+        : "3",
     sortBy,
   });
-
+  useEffect(() => {
+    if (isError && error && error?.response?.status === 401) {
+      navigate("/login");
+    }
+  }, [isError, error, navigate]);
   const tasks = tasksResponse?.tasks || [];
   const totalPages = tasksResponse?.totalPages || 1;
 
   const handleDeleteTask = async (taskId: number) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm("Are you sure you want to delete this task?")) {
       try {
         await deleteTaskMutation.mutateAsync(taskId);
       } catch (error) {
-        console.error('Failed to delete task:', error);
+        console.error("Failed to delete task:", error);
       }
     }
   };
 
   const handleMarkComplete = async (taskId: number) => {
     try {
-      await markCompleteMutation.mutateAsync(taskId);
+      await updateStatusMutation.mutateAsync({ id: taskId, status: 3 });
     } catch (error) {
-      console.error('Failed to mark task as complete:', error);
+      console.error("Failed to mark task as complete:", error);
     }
   };
 
@@ -51,25 +70,33 @@ const Dashboard: React.FC = () => {
     try {
       await updateStatusMutation.mutateAsync({ id: taskId, status: 2 });
     } catch (error) {
-      console.error('Failed to mark task as in progress:', error);
+      console.error("Failed to mark task as in progress:", error);
     }
   };
 
   const getPriorityLabel = (priority: number) => {
     switch (priority) {
-      case 1: return 'Low';
-      case 2: return 'Medium';
-      case 3: return 'High';
-      default: return 'Unknown';
+      case 1:
+        return "Low";
+      case 2:
+        return "Medium";
+      case 3:
+        return "High";
+      default:
+        return "Unknown";
     }
   };
 
   const getStatusLabel = (status: number) => {
     switch (status) {
-      case 1: return 'Pending';
-      case 2: return 'In Progress';
-      case 3: return 'Completed';
-      default: return 'Unknown';
+      case 1:
+        return "Pending";
+      case 2:
+        return "In Progress";
+      case 3:
+        return "Completed";
+      default:
+        return "Unknown";
     }
   };
 
@@ -84,7 +111,9 @@ const Dashboard: React.FC = () => {
   return (
     <AppLayout
       title="Task Manager"
-      actions={<Button onClick={() => navigate('/tasks/new')}>Add New Task</Button>}
+      actions={
+        <Button onClick={() => navigate("/tasks/new")}>Add New Task</Button>
+      }
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-wrap gap-4">
@@ -92,12 +121,15 @@ const Dashboard: React.FC = () => {
             <Select
               label="Filter by Status"
               value={filter}
-              onChange={(e) => {setFilter(e.target.value); setPage(1);}}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setPage(1);
+              }}
               options={[
-                { value: 'all', label: 'All Tasks' },
-                { value: 'pending', label: 'Pending' },
-                { value: 'in_progress', label: 'In Progress' },
-                { value: 'completed', label: 'Completed' },
+                { value: "all", label: "All Tasks" },
+                { value: "pending", label: "Pending" },
+                { value: "in_progress", label: "In Progress" },
+                { value: "completed", label: "Completed" },
               ]}
             />
           </div>
@@ -105,11 +137,14 @@ const Dashboard: React.FC = () => {
             <Select
               label="Sort by"
               value={sortBy}
-              onChange={(e) => {setSortBy(e.target.value); setPage(1);}}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
               options={[
-                { value: 'due_date', label: 'Due Date' },
-                { value: 'priority', label: 'Priority' },
-                { value: 'title', label: 'Title' },
+                { value: "due_date", label: "Due Date" },
+                { value: "priority", label: "Priority" },
+                { value: "title", label: "Title" },
               ]}
             />
           </div>
@@ -121,7 +156,7 @@ const Dashboard: React.FC = () => {
               title="No tasks"
               description="Get started by creating your first task."
               actionLabel="Create Task"
-              onAction={() => navigate('/tasks/new')}
+              onAction={() => navigate("/tasks/new")}
             />
           ) : (
             <ul className="divide-y divide-gray-200">
@@ -130,16 +165,36 @@ const Dashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium text-gray-900">{task.title}</h3>
-                        <Badge tone={task.priority === 3 ? 'red' : task.priority === 2 ? 'yellow' : 'green'}>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {task.title}
+                        </h3>
+                        <Badge
+                          tone={
+                            task.priority === 3
+                              ? "red"
+                              : task.priority === 2
+                              ? "yellow"
+                              : "green"
+                          }
+                        >
                           {getPriorityLabel(task.priority)}
                         </Badge>
-                        <Badge tone={task.status === 3 ? 'green' : task.status === 2 ? 'blue' : 'gray'}>
+                        <Badge
+                          tone={
+                            task.status === 3
+                              ? "green"
+                              : task.status === 2
+                              ? "blue"
+                              : "gray"
+                          }
+                        >
                           {getStatusLabel(task.status)}
                         </Badge>
                       </div>
                       {task.description && (
-                        <p className="mt-1 text-sm text-gray-600">{task.description}</p>
+                        <p className="mt-1 text-sm text-gray-600">
+                          {task.description}
+                        </p>
                       )}
                       <p className="mt-1 text-sm text-gray-500">
                         Due: {new Date(task.due_date).toLocaleDateString()}
@@ -147,13 +202,27 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {task.status === 1 && (
-                        <Button onClick={() => handleMarkInProgress(task.id)}>Mark In Progress</Button>
+                        <Button onClick={() => handleMarkInProgress(task.id)}>
+                          Mark In Progress
+                        </Button>
                       )}
                       {task.status !== 3 && (
-                        <Button onClick={() => handleMarkComplete(task.id)}>Mark Complete</Button>
+                        <Button onClick={() => handleMarkComplete(task.id)}>
+                          Mark Complete
+                        </Button>
                       )}
-                      <Button variant="ghost" onClick={() => navigate(`/tasks/${task.id}/edit`)}>Edit</Button>
-                      <Button variant="danger" onClick={() => handleDeleteTask(task.id)}>Delete</Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigate(`/tasks/${task.id}/edit`)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteTask(task.id)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </li>
